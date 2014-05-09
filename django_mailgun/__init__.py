@@ -65,7 +65,8 @@ class MailgunBackend(BaseEmailBackend):
                          },
                      files={
                             "message": StringIO(email_message.message().as_string()),
-                         }
+                         },
+                         timeout=10
                      )
         except:
             if not self.fail_silently:
