@@ -2,14 +2,7 @@ import requests
 from django.conf import settings
 from django.core.mail.backends.base import BaseEmailBackend
 from django.core.mail.message import sanitize_address
-
-try:
-    from io import StringIO
-except ImportError:
-    try:
-        from cStringIO import StringIO
-    except ImportError:
-        from StringIO import StringIO
+from django.utils import six
 
 
 class MailgunAPIError(Exception):
@@ -54,6 +47,7 @@ class MailgunBackend(BaseEmailBackend):
             return False
         from_email = sanitize_address(email_message.from_email, email_message.encoding)
         recipients = [sanitize_address(addr, email_message.encoding) for addr in email_message.recipients()]
+        message = email_message.message().as_string()
 
         try:
             r = requests.post(
@@ -64,7 +58,7 @@ class MailgunBackend(BaseEmailBackend):
                     "from": from_email,
                 },
                 files={
-                    "message": StringIO(email_message.message().as_string()),
+                    "message": six.StringIO(message)
                 },
                 timeout=self._connection_timeout
             )
